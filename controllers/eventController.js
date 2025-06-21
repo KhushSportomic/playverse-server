@@ -122,10 +122,24 @@ exports.getAllEvents = async (req, res) => {
     const events = await eventsQuery;
     const allSports = await Event.distinct("sportsName");
 
-    const eventsWithSlots = events.map((event) => ({
-      ...event._doc,
-      slotsLeft: event.participantsLimit - event.currentParticipants,
-    }));
+    // const eventsWithSlots = events.map((event) => ({
+    //   ...event._doc,
+    //   slotsLeft: event.participantsLimit - event.currentParticipants,
+    // }));
+
+    const eventsWithSlots = events.map((event) => {
+      const successfulParticipants = event.participants.filter(
+        (p) => p.paymentStatus === "success"
+      );
+      const totalBookedSlots = successfulParticipants.reduce(
+        (sum, p) => sum + p.quantity,
+        0
+      );
+      return {
+        ...event._doc,
+        slotsLeft: event.participantsLimit - totalBookedSlots,
+      };
+    });
 
     // Construct response with pagination metadata
     const response = {
