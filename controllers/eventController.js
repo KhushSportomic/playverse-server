@@ -448,12 +448,12 @@ exports.initiateBooking = async (req, res) => {
         email: email ? email.trim() : `${phone}@example.com`, // Ensure email is valid
       };
 
-      // const payuRequest = await createPayuPaymentRequest(totalAmount, eventDetails, userDetails); // removed
-      const payuRequest = await createPayuPaymentRequest( // added
+      const backendUrl = `${req.protocol}://${req.get("host")}`;
+      const payuRequest = await createPayuPaymentRequest(
         totalAmount,
         eventDetails,
         userDetails,
-        clientUrl
+        backendUrl
       );
       console.log("PayU request sent:", payuRequest.paymentData); // Debug log
 
@@ -466,6 +466,7 @@ exports.initiateBooking = async (req, res) => {
         bookingDate: new Date(),
         amount: totalAmount,
         quantity,
+        clientUrl,
       };
 
       event.participants.push(participant);
@@ -633,98 +634,115 @@ exports.handlePayuWebhook = async (req, res) => {
 
 //PayU success and failure handlers
 exports.handlePayuSuccess = async (req, res) => {
+  const payuResponse = req.body;
+  console.log("PayU success response received:", payuResponse);
+  const { txnid, status, udf3 } = payuResponse;
+  const eventId = udf3;
+
+  if (!txnid || !status) {
+    return res.status(400).json({ error: "Invalid response from PayU" });
+  }
+
+  const session = await mongoose.startSession();
+  session.startTransaction();
   try {
-    // Log the full response for debugging
-    console.log("PayU Success Response:", req.body);
+    const event = await Event.findOne({ "participants.orderId": txnid });
+    let clientUrl = process.env.CLIENT_BASE_URL;
 
-    // Verify the payment response first
-    const isValid = verifyPayuPayment(req.body);
-    if (!isValid) {
-      console.error(
-        "Invalid hash in PayU success redirect. TXN ID:",
-        req.body.txnid,
-        "Details:",
-        req.body
+    if (event) {
+      const participant = event.participants.find((p) => p.orderId === txnid);
+
+      if (participant && participant.paymentStatus !== "success") {
+        participant.paymentStatus = "success";
+        participant.paymentId = payuResponse.mihpayid;
+        await event.save({ session });
+
+        // Send confirmation email/SMS if needed here
+      }
+
+      await session.commitTransaction();
+      session.endSession();
+
+      const redirectUrl = participant?.clientUrl || process.env.CLIENT_BASE_URL;
+      return res.redirect(
+        `${redirectUrl}/event/${event._id}?payment=success&txnid=${txnid}`
       );
-      return res.redirect("/payment/failure?reason=hash_verification_failed");
     }
 
-    // Check payment status
-    if (req.body.status.toLowerCase() !== "success") {
-      console.error(
-        "Payment not successful. Status:",
-        req.body.status,
-        "TXN ID:",
-        req.body.txnid
-      );
-      return res.redirect("/payment/failure?reason=payment_not_successful");
-    }
+    await session.commitTransaction();
+    session.endSession();
 
-    // Extract event ID - improved handling
-    const eventId =
-      req.body.udf1 && req.body.udf1 !== "undefined"
-        ? req.body.udf3.trim()
-        : null;
-
-    if (!eventId) {
-      console.error(
-        "Missing or invalid eventId in success redirect. TXN ID:",
-        req.body.txnid,
-        "UDF Fields:",
-        {
-          udf1: req.body.udf1,
-          udf2: req.body.udf2,
-          udf3: req.body.udf3,
-          udf4: req.body.udf4,
-          udf5: req.body.udf5,
-        }
-      );
-      return res.redirect("/payment/failure?reason=invalid_event_reference");
-    }
-
-    // Redirect to the event page without query parameters
-    return res.redirect(`https://playverse.sportomic.com/event/${eventId}`);
-  } catch (error) {
-    console.error(
-      "Unexpected error in PayU success handler:",
-      error.message,
-      "Stack:",
-      error.stack
+    // Fallback redirect if event not found
+    const eventForFallback = await Event.findOne({
+      "participants.orderId": txnid,
+    });
+    const participantForFallback = eventForFallback?.participants.find(
+      (p) => p.orderId === txnid
     );
-    return res.redirect("/payment/failure?reason=server_error");
+    const redirectUrl =
+      participantForFallback?.clientUrl || process.env.CLIENT_BASE_URL;
+    res.redirect(
+      `${redirectUrl}/event/${eventForFallback?._id}?payment=success&txnid=${txnid}`
+    );
+  } catch (error) {
+    console.error("Error processing PayU success response:", error);
+    await session.abortTransaction();
+    session.endSession();
+    // Redirect to a failure page on the frontend
+    const eventForFallback = await Event.findOne({
+      "participants.orderId": payuResponse.txnid,
+    });
+    const participantForFallback = eventForFallback?.participants.find(
+      (p) => p.orderId === payuResponse.txnid
+    );
+    const redirectUrl =
+      participantForFallback?.clientUrl || process.env.CLIENT_BASE_URL;
+    res.redirect(
+      `${redirectUrl}/event/${eventForFallback?._id}?payment=failure&reason=server_error`
+    );
   }
 };
 
 exports.handlePayuFailure = async (req, res) => {
+  const payuResponse = req.body;
+  console.log("PayU failure response received:", payuResponse);
+  const { txnid, status, udf3 } = payuResponse;
+  const eventId = udf3;
+
+  if (!txnid || !status) {
+    return res.status(400).json({ error: "Invalid response from PayU" });
+  }
+
+  const session = await mongoose.startSession();
+  session.startTransaction();
   try {
-    // Log detailed failure information
-    console.log("PayU Payment Failed. Details:", {
-      txnid: req.body.txnid,
-      status: req.body.status,
-      error: req.body.error_Message,
-      allFields: req.body,
-    });
+    const event = await Event.findOne({ "participants.orderId": txnid });
+    let clientUrl = process.env.CLIENT_BASE_URL;
 
-    // Extract event ID if available to redirect back to specific event
-    const eventId =
-      req.body.udf1 && req.body.udf1 !== "undefined"
-        ? req.body.udf3.trim()
-        : null;
-
-    // Redirect to the event page without query parameters
-    const redirectUrl = eventId
-      ? `https://playverse.sportomic.com/event/${eventId}`
-      : `https://playverse.sportomic.com/`;
-
-    return res.redirect(redirectUrl);
-  } catch (error) {
-    console.error(
-      "Unexpected error in PayU failure handler:",
-      error.message,
-      "Stack:",
-      error.stack
+    if (event) {
+      const participant = event.participants.find((p) => p.orderId === txnid);
+      if (participant) {
+        clientUrl = participant.clientUrl || clientUrl;
+        if (participant.paymentStatus !== "success") {
+          participant.paymentStatus = "failed";
+          await event.save({ session });
+        }
+      }
+    }
+    await session.commitTransaction();
+    session.endSession();
+    res.redirect(
+      `${clientUrl}/event/${eventId}?payment=failure&reason=${
+        payuResponse.error_Message || "payment_failed"
+      }`
     );
-    return res.redirect("https://playverse.sportomic.com/");
+  } catch (error) {
+    console.error("Error processing PayU failure response:", error);
+    await session.abortTransaction();
+    session.endSession();
+    res.redirect(
+      `${process.env.CLIENT_BASE_URL}/event/${eventId}?payment=failure&reason=server_error`
+    );
   }
 };
 

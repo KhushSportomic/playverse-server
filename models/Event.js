@@ -33,6 +33,7 @@ const participantSchema = new mongoose.Schema({
     required: true,
     min: 0,
   },
+  clientUrl: { type: String },
 });
 
 const eventSchema = new mongoose.Schema({

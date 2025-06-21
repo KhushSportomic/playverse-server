@@ -34,7 +34,7 @@ exports.createPayuPaymentRequest = async (
   amount,
   eventDetails,
   userDetails,
-  clientUrl
+  backendUrl
 ) => {
   // console.log("Creating PayU payment request with inputs:", {
   //   amount,
@@ -43,11 +43,11 @@ exports.createPayuPaymentRequest = async (
   // });
 
   // added: Dynamically create success and failure URLs
-  const successUrl = clientUrl
-    ? `${clientUrl}/event/${eventDetails.eventId}?payment=success`
+  const successUrl = backendUrl
+    ? `${backendUrl}/api/events/payu/success`
     : payuConfig.successUrl;
-  const failureUrl = clientUrl
-    ? `${clientUrl}/event/${eventDetails.eventId}?payment=failure`
+  const failureUrl = backendUrl
+    ? `${backendUrl}/api/events/payu/failure`
     : payuConfig.failureUrl;
 
   const txnId = `TXN_${Date.now()}_${Math.floor(Math.random() * 1000)}`;
