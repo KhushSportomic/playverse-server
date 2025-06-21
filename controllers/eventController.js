@@ -174,7 +174,23 @@ exports.getEventById = async (req, res) => {
   try {
     const event = await Event.findById(id);
     if (!event) return res.status(404).json({ error: "Event not found" });
-    res.status(200).json(event);
+
+    const successfulParticipants = event.participants.filter(
+      (p) => p.paymentStatus === "success"
+    );
+    const totalBookedSlots = successfulParticipants.reduce(
+      (sum, p) => sum + p.quantity,
+      0
+    );
+    const slotsLeft = event.participantsLimit - totalBookedSlots;
+
+    const eventWithSlots = {
+      ...event._doc,
+      slotsLeft,
+      totalBookedSlots,
+    };
+
+    res.status(200).json(eventWithSlots);
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: "Failed to fetch event" });
