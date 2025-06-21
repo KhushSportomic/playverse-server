@@ -67,9 +67,9 @@ const authRoutes = require("./routes/adminAuthRoutes");
 const eventRoutes = require("./routes/eventRoutes");
 const contactRoutes = require("./routes/contactRoutes");
 
-app.use("/admin", authRoutes);
-app.use("/events", eventRoutes);
-app.use("/contact", contactRoutes);
+app.use("/api/admin", authRoutes);
+app.use("/api/events", eventRoutes);
+app.use("/api/contact", contactRoutes);
 
 // Default Route
 app.get("/", (req, res) => {
