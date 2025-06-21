@@ -22,16 +22,33 @@ const payuConfig = {
 //   failureUrl: payuConfig.failureUrl,
 // });
 
+/* removed
 exports.createPayuPaymentRequest = async (
   amount,
   eventDetails,
   userDetails
+) => {
+*/
+// added
+exports.createPayuPaymentRequest = async (
+  amount,
+  eventDetails,
+  userDetails,
+  clientUrl
 ) => {
   // console.log("Creating PayU payment request with inputs:", {
   //   amount,
   //   eventDetails,
   //   userDetails,
   // });
+
+  // added: Dynamically create success and failure URLs
+  const successUrl = clientUrl
+    ? `${clientUrl}/event/${eventDetails.eventId}?payment=success`
+    : payuConfig.successUrl;
+  const failureUrl = clientUrl
+    ? `${clientUrl}/event/${eventDetails.eventId}?payment=failure`
+    : payuConfig.failureUrl;
 
   const txnId = `TXN_${Date.now()}_${Math.floor(Math.random() * 1000)}`;
   console.log("Generated transaction ID:", txnId);
@@ -54,8 +71,8 @@ exports.createPayuPaymentRequest = async (
     firstname: userDetails.name,
     email: userDetails.email || "customer@example.com",
     phone: userDetails.phone,
-    surl: payuConfig.successUrl,
-    furl: payuConfig.failureUrl,
+    surl: successUrl,
+    furl: failureUrl,
     udf1: userDetails.skillLevel || "",
     udf2: userDetails.quantity.toString() || "",
     udf3: eventDetails.eventId,

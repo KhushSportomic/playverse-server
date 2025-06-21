@@ -377,7 +377,8 @@ exports.getEventReports = async (req, res) => {
 //payU paymnet logic
 exports.initiateBooking = async (req, res) => {
   const { id } = req.params;
-  const { name, phone, skillLevel, quantity = 1, email } = req.body;
+  // const { name, phone, skillLevel, quantity = 1, email } = req.body; // removed
+  const { name, phone, skillLevel, quantity = 1, email, clientUrl } = req.body; // added
 
   try {
     if (!name || !phone || !skillLevel) {
@@ -447,10 +448,12 @@ exports.initiateBooking = async (req, res) => {
         email: email ? email.trim() : `${phone}@example.com`, // Ensure email is valid
       };
 
-      const payuRequest = await createPayuPaymentRequest(
+      // const payuRequest = await createPayuPaymentRequest(totalAmount, eventDetails, userDetails); // removed
+      const payuRequest = await createPayuPaymentRequest( // added
         totalAmount,
         eventDetails,
-        userDetails
+        userDetails,
+        clientUrl
       );
       console.log("PayU request sent:", payuRequest.paymentData); // Debug log
 
