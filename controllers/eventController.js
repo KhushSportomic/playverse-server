@@ -171,6 +171,14 @@ exports.getEventById = async (req, res) => {
     const event = await Event.findById(id);
     if (!event) return res.status(404).json({ error: "Event not found" });
 
+    // Find the venue for this event (case-insensitive, trimmed match)
+    const Venue = require("../models/Venue");
+    const venue = await Venue.findOne({
+      name: { $regex: `^${event.venueName.trim()}$`, $options: 'i' },
+      location: { $regex: `^${event.location.trim()}$`, $options: 'i' },
+      sport: { $regex: `^${event.sportsName.trim()}$`, $options: 'i' },
+    });
+
     const successfulParticipants = event.participants.filter(
       (p) => p.paymentStatus === "success"
     );
@@ -184,6 +192,7 @@ exports.getEventById = async (req, res) => {
       ...event._doc,
       slotsLeft,
       totalBookedSlots,
+      mapUrl: venue ? venue.mapUrl : "",
     };
 
     res.status(200).json(eventWithSlots);
