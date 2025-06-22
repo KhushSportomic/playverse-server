@@ -66,10 +66,12 @@ connectDB();
 const authRoutes = require("./routes/adminAuthRoutes");
 const eventRoutes = require("./routes/eventRoutes");
 const contactRoutes = require("./routes/contactRoutes");
+const venueRoutes = require("./routes/venueRoutes");
 
 app.use("/api/admin", authRoutes);
 app.use("/api/events", eventRoutes);
 app.use("/api/contact", contactRoutes);
+app.use("/api/venues", venueRoutes);
 
 // Default Route
 app.get("/", (req, res) => {

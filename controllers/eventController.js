@@ -122,11 +122,6 @@ exports.getAllEvents = async (req, res) => {
     const events = await eventsQuery;
     const allSports = await Event.distinct("sportsName");
 
-    // const eventsWithSlots = events.map((event) => ({
-    //   ...event._doc,
-    //   slotsLeft: event.participantsLimit - event.currentParticipants,
-    // }));
-
     const eventsWithSlots = events.map((event) => {
       const successfulParticipants = event.participants.filter(
         (p) => p.paymentStatus === "success"
@@ -135,10 +130,11 @@ exports.getAllEvents = async (req, res) => {
         (sum, p) => sum + p.quantity,
         0
       );
-      return {
+      const eventWithSlots = {
         ...event._doc,
         slotsLeft: event.participantsLimit - totalBookedSlots,
       };
+      return eventWithSlots;
     });
 
     // Construct response with pagination metadata
@@ -788,9 +784,15 @@ exports.uploadEventsFromExcel = async (req, res) => {
       return res.status(500).json({ message: "Uploaded file not found" });
     }
 
+    console.log("Processing Excel file:", filePath);
+
     const workbook = XLSX.readFile(filePath);
     const sheetName = workbook.SheetNames[0];
     const data = XLSX.utils.sheet_to_json(workbook.Sheets[sheetName]);
+    
+    console.log("Raw Excel data:", data);
+    console.log("Number of events to process:", data.length);
+
     const excelSerialToJSDate = (serial) => {
       const excelEpoch = new Date(Date.UTC(1899, 11, 30));
       const utcDate = new Date(excelEpoch.getTime() + serial * 86400000);
@@ -817,27 +819,44 @@ exports.uploadEventsFromExcel = async (req, res) => {
       ) {
         throw new Error("Each event must have all required fields");
       }
-      return {
+      
+      const processedEvent = {
         name: event.name,
         description: event.description,
         date: excelSerialToJSDate(event.date),
         slot: event.slot,
         participantsLimit: Number(event.participantsLimit),
+        currentParticipants: 0, // Add this field for new events
         price: Number(event.price),
         venueName: event.venueName,
         venueImage: event.venueImage || "",
         location: event.location,
         sportsName: event.sportsName,
+        participants: [], // Add empty participants array
       };
+      
+      console.log("Processed event:", processedEvent);
+      return processedEvent;
     });
 
-    await Event.insertMany(events);
+    console.log("Saving events to database...");
+    const savedEvents = await Event.insertMany(events);
+    console.log("Successfully saved", savedEvents.length, "events to database");
+    
     fs.unlinkSync(filePath);
+    console.log("Temporary file deleted");
 
-    res.status(201).json({ message: "Events Uploaded Successfully", events });
+    res.status(201).json({ 
+      message: "Events Uploaded Successfully", 
+      count: savedEvents.length,
+      events: savedEvents 
+    });
   } catch (error) {
-    console.error("Error processing file:", error);
-    res.status(500).json({ message: error.message });
+    console.error("Error in uploadEventsFromExcel:", error);
+    res.status(500).json({ 
+      message: "Failed to upload events", 
+      error: error.message 
+    });
   }
 };
 
