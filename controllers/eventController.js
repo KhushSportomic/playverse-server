@@ -658,9 +658,9 @@ exports.handlePayuWebhook = async (req, res) => {
         if (occupancy >= 75 && !updatedEvent.notified75) {
           try {
             await sendWhatsAppMsg91(
-              '919408824242', // TODO: Replace with the number to notify
-              '75% slots booked!',
-              `Event: ${updatedEvent.name} has reached 75% occupancy.`
+              '919408824242',
+              updatedEvent.name, // Name (for {{1}})
+              `75% slots booked for event ID: ${updatedEvent._id}` // Order number/info (for {{2}})
             );
             updatedEvent.notified75 = true;
             shouldSave = true;
@@ -672,9 +672,9 @@ exports.handlePayuWebhook = async (req, res) => {
         if (occupancy >= 100 && !updatedEvent.notified100) {
           try {
             await sendWhatsAppMsg91(
-              '919408824242', // TODO: Replace with the number to notify
-              '100% slots booked!',
-              `Event: ${updatedEvent.name} is fully booked!`
+              '919408824242',
+              updatedEvent.name, // Name (for {{1}})
+              `100% slots booked for event ID: ${updatedEvent._id}` // Order number/info (for {{2}})
             );
             updatedEvent.notified100 = true;
             shouldSave = true;
