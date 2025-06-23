@@ -137,6 +137,9 @@ exports.getAllEvents = async (req, res) => {
       return eventWithSlots;
     });
 
+    // Sort events by slotsLeft (ascending: fewer slots left first)
+    eventsWithSlots.sort((a, b) => a.slotsLeft - b.slotsLeft);
+
     // Construct response with pagination metadata
     const response = {
       total: totalEvents,
