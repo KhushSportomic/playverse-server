@@ -15,6 +15,7 @@ const {
   verifyPayuPayment,
 } = require("../utils/payu");
 const { getTodayEventsReport } = require("../corn/eventCorn");
+const { sendWhatsAppMsg91 } = require('../utils/msg91');
 // Removed: const Sentry = require("@sentry/node");
 
 //Download Event Excel
@@ -640,6 +641,49 @@ exports.handlePayuWebhook = async (req, res) => {
           },
           { session }
         );
+
+        // --- MSG91 WhatsApp Notification Logic ---
+        // Re-fetch event to get updated participants
+        const updatedEvent = await Event.findById(event._id).session(session);
+        const successfulParticipantsUpdated = updatedEvent.participants.filter(
+          (p) => p.paymentStatus === "success"
+        );
+        const totalBookedSlotsUpdated = successfulParticipantsUpdated.reduce(
+          (acc, curr) => acc + curr.quantity,
+          0
+        );
+        const occupancy = (totalBookedSlotsUpdated / updatedEvent.participantsLimit) * 100;
+        let shouldSave = false;
+        // 75% notification
+        if (occupancy >= 75 && !updatedEvent.notified75) {
+          try {
+            await sendWhatsAppMsg91(
+              '919408824242', // TODO: Replace with the number to notify
+              '75% slots booked!',
+              `Event: ${updatedEvent.name} has reached 75% occupancy.`
+            );
+            updatedEvent.notified75 = true;
+            shouldSave = true;
+          } catch (err) {
+            console.error('Failed to send 75% MSG91 WhatsApp notification:', err.message);
+          }
+        }
+        // 100% notification
+        if (occupancy >= 100 && !updatedEvent.notified100) {
+          try {
+            await sendWhatsAppMsg91(
+              '919408824242', // TODO: Replace with the number to notify
+              '100% slots booked!',
+              `Event: ${updatedEvent.name} is fully booked!`
+            );
+            updatedEvent.notified100 = true;
+            shouldSave = true;
+          } catch (err) {
+            console.error('Failed to send 100% MSG91 WhatsApp notification:', err.message);
+          }
+        }
+        if (shouldSave) await updatedEvent.save({ session });
+        // --- End MSG91 WhatsApp Notification Logic ---
       } else {
         await Event.updateOne(
           { _id: event._id, "participants.orderId": txnId },

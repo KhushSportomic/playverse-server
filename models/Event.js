@@ -78,6 +78,14 @@ const eventSchema = new mongoose.Schema({
     default: 0,
     min: 0,
   },
+  notified75: {
+    type: Boolean,
+    default: false,
+  },
+  notified100: {
+    type: Boolean,
+    default: false,
+  },
 });
 
 // Update the pre-save validation to only count confirmed participants
