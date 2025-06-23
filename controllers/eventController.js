@@ -130,15 +130,18 @@ exports.getAllEvents = async (req, res) => {
         (sum, p) => sum + p.quantity,
         0
       );
+      const slotsLeft = event.participantsLimit - totalBookedSlots;
+      const filledPercent = event.participantsLimit > 0 ? totalBookedSlots / event.participantsLimit : 0;
       const eventWithSlots = {
         ...event._doc,
-        slotsLeft: event.participantsLimit - totalBookedSlots,
+        slotsLeft,
+        filledPercent,
       };
       return eventWithSlots;
     });
 
-    // Sort events by slotsLeft (ascending: fewer slots left first)
-    eventsWithSlots.sort((a, b) => a.slotsLeft - b.slotsLeft);
+    // Sort events by filledPercent (descending: most filled first)
+    eventsWithSlots.sort((a, b) => b.filledPercent - a.filledPercent);
 
     // Construct response with pagination metadata
     const response = {
