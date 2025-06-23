@@ -1,7 +1,7 @@
 require("./instrument");
 const express = require("express");
 const cors = require("cors");
-const bodyParser = require("body-parser");
+// const bodyParser = require("body-parser");
 const dotenv = require("dotenv");
 const connectDB = require("./config/db");
 const fs = require("fs");
@@ -55,9 +55,13 @@ app.get("/api/events/webhook/payu", (req, res, next) => {
   });
 });
 
-// Apply body parsing for all other routes
-app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: true }));
+// // Apply body parsing for all other routes
+// app.use(bodyParser.json());
+// app.use(bodyParser.urlencoded({ extended: true }));
+
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+
 
 // MongoDB Connection
 connectDB();
