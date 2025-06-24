@@ -39,6 +39,9 @@ async function sendWhatsAppMsg91(to, body1, body2) {
       }
     };
 
+    // 👇 Log payload before sending
+    console.log('👉 MSG91 WhatsApp Payload:', JSON.stringify(payload, null, 2));
+
     const response = await axios.post(MSG91_API_URL, payload, {
       headers: {
         'Content-Type': 'application/json',
@@ -46,9 +49,13 @@ async function sendWhatsAppMsg91(to, body1, body2) {
       }
     });
 
+    // 👇 Log the API response
+    console.log('✅ MSG91 API Response:', response.data);
+
     return response.data;
   } catch (error) {
-    console.error('MSG91 WhatsApp Error:', error.response?.data || error.message);
+    // 👇 Log error properly
+    console.error('❌ MSG91 WhatsApp Error:', error.response?.data || error.message);
     throw error;
   }
 }
