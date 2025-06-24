@@ -642,50 +642,50 @@ exports.handlePayuWebhook = async (req, res) => {
           { session }
         );
 
-        // --- MSG91 WhatsApp Notification Logic ---
-        // Re-fetch event to get updated participants
-        const updatedEvent = await Event.findById(event._id).session(session);
-        const successfulParticipantsUpdated = updatedEvent.participants.filter(
-          (p) => p.paymentStatus === "success"
-        );
-        const totalBookedSlotsUpdated = successfulParticipantsUpdated.reduce(
-          (acc, curr) => acc + curr.quantity,
-          0
-        );
-        const occupancy = (totalBookedSlotsUpdated / updatedEvent.participantsLimit) * 100;
-        let shouldSave = false;
-        // 75% notification
-        console.log("outside 75% condition");
-        if (occupancy >= 75 && !updatedEvent.notified75) {
-          console.log("inside 75% condition");
-          try {
-            await sendWhatsAppMsg91(
-              '919408824242',
-              updatedEvent.name, // Name (for {{1}})
-              `75% slots booked for event ID: ${updatedEvent._id}` // Order number/info (for {{2}})
-            );
-            updatedEvent.notified75 = true;
-            shouldSave = true;
-          } catch (err) {
-            console.error('Failed to send 75% MSG91 WhatsApp notification:', err.message);
-          }
-        }
-        // 100% notification
-        if (occupancy >= 100 && !updatedEvent.notified100) {
-          try {
-            await sendWhatsAppMsg91(
-              '919408824242',
-              updatedEvent.name, // Name (for {{1}})
-              `100% slots booked for event ID: ${updatedEvent._id}` // Order number/info (for {{2}})
-            );
-            updatedEvent.notified100 = true;
-            shouldSave = true;
-          } catch (err) {
-            console.error('Failed to send 100% MSG91 WhatsApp notification:', err.message);
-          }
-        }
-        if (shouldSave) await updatedEvent.save({ session });
-        // --- End MSG91 WhatsApp Notification Logic ---
+        // // --- MSG91 WhatsApp Notification Logic ---
+        // // Re-fetch event to get updated participants
+        // const updatedEvent = await Event.findById(event._id).session(session);
+        // const successfulParticipantsUpdated = updatedEvent.participants.filter(
+        //   (p) => p.paymentStatus === "success"
+        // );
+        // const totalBookedSlotsUpdated = successfulParticipantsUpdated.reduce(
+        //   (acc, curr) => acc + curr.quantity,
+        //   0
+        // );
+        // const occupancy = (totalBookedSlotsUpdated / updatedEvent.participantsLimit) * 100;
+        // let shouldSave = false;
+        // // 75% notification
+        // console.log("outside 75% condition");
+        // if (occupancy >= 75 && !updatedEvent.notified75) {
+        //   console.log("inside 75% condition");
+        //   try {
+        //     await sendWhatsAppMsg91(
+        //       '919408824242',
+        //       updatedEvent.name, // Name (for {{1}})
+        //       `75% slots booked for event ID: ${updatedEvent._id}` // Order number/info (for {{2}})
+        //     );
+        //     updatedEvent.notified75 = true;
+        //     shouldSave = true;
+        //   } catch (err) {
+        //     console.error('Failed to send 75% MSG91 WhatsApp notification:', err.message);
+        //   }
+        // }
+        // // 100% notification
+        // if (occupancy >= 100 && !updatedEvent.notified100) {
+        //   try {
+        //     await sendWhatsAppMsg91(
+        //       '919408824242',
+        //       updatedEvent.name, // Name (for {{1}})
+        //       `100% slots booked for event ID: ${updatedEvent._id}` // Order number/info (for {{2}})
+        //     );
+        //     updatedEvent.notified100 = true;
+        //     shouldSave = true;
+        //   } catch (err) {
+        //     console.error('Failed to send 100% MSG91 WhatsApp notification:', err.message);
+        //   }
+        // }
+        // if (shouldSave) await updatedEvent.save({ session });
+        // // --- End MSG91 WhatsApp Notification Logic ---
       } else {
         await Event.updateOne(
           { _id: event._id, "participants.orderId": txnId },
@@ -745,6 +745,51 @@ exports.handlePayuSuccess = async (req, res) => {
         await event.save({ session });
 
         // Send confirmation email/SMS if needed here
+
+        // --- MSG91 WhatsApp Notification Logic ---
+        // Re-fetch event to get updated participants
+        const updatedEvent = await Event.findById(event._id).session(session);
+        const successfulParticipantsUpdated = updatedEvent.participants.filter(
+          (p) => p.paymentStatus === "success"
+        );
+        const totalBookedSlotsUpdated = successfulParticipantsUpdated.reduce(
+          (acc, curr) => acc + curr.quantity,
+          0
+        );
+        const occupancy = (totalBookedSlotsUpdated / updatedEvent.participantsLimit) * 100;
+        let shouldSave = false;
+        // 75% notification
+        console.log("outside 75% condition");
+        if (occupancy >= 75 && !updatedEvent.notified75) {
+          console.log("inside 75% condition");
+          try {
+            await sendWhatsAppMsg91(
+              '919408824242',
+              updatedEvent.name, // Name (for {{1}})
+              `75% slots booked for event ID: ${updatedEvent._id}` // Order number/info (for {{2}})
+            );
+            updatedEvent.notified75 = true;
+            shouldSave = true;
+          } catch (err) {
+            console.error('Failed to send 75% MSG91 WhatsApp notification:', err.message);
+          }
+        }
+        // 100% notification
+        if (occupancy >= 100 && !updatedEvent.notified100) {
+          try {
+            await sendWhatsAppMsg91(
+              '919408824242',
+              updatedEvent.name, // Name (for {{1}})
+              `100% slots booked for event ID: ${updatedEvent._id}` // Order number/info (for {{2}})
+            );
+            updatedEvent.notified100 = true;
+            shouldSave = true;
+          } catch (err) {
+            console.error('Failed to send 100% MSG91 WhatsApp notification:', err.message);
+          }
+        }
+        if (shouldSave) await updatedEvent.save({ session });
+        // --- End MSG91 WhatsApp Notification Logic ---
       }
 
       await session.commitTransaction();
