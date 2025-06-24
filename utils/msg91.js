@@ -14,6 +14,7 @@ async function sendWhatsAppMsg91(to, body1, body2) {
       payload: {
         messaging_product: "whatsapp",
         type: "template",
+        to: [to],
         template: {
           name: TEMPLATE_NAME,
           language: {
@@ -21,19 +22,13 @@ async function sendWhatsAppMsg91(to, body1, body2) {
             policy: "deterministic"
           },
           namespace: NAMESPACE,
-          to_and_components: [
+          components: [
             {
-              to: [to],
-              components: {
-                body_1: {
-                  type: "text",
-                  value: body1
-                },
-                body_2: {
-                  type: "text",
-                  value: body2
-                }
-              }
+              type: "body",
+              parameters: [
+                { type: "text", text: body1 },
+                { type: "text", text: body2 }
+              ]
             }
           ]
         }
@@ -54,4 +49,4 @@ async function sendWhatsAppMsg91(to, body1, body2) {
   }
 }
 
-module.exports = { sendWhatsAppMsg91 }; 
+module.exports = { sendWhatsAppMsg91 };
