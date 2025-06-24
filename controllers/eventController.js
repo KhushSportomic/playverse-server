@@ -655,7 +655,9 @@ exports.handlePayuWebhook = async (req, res) => {
         const occupancy = (totalBookedSlotsUpdated / updatedEvent.participantsLimit) * 100;
         let shouldSave = false;
         // 75% notification
+        console.log("outside 75% condition");
         if (occupancy >= 75 && !updatedEvent.notified75) {
+          console.log("inside 75% condition");
           try {
             await sendWhatsAppMsg91(
               '919408824242',
