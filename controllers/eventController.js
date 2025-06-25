@@ -15,7 +15,7 @@ const {
   verifyPayuPayment,
 } = require("../utils/payu");
 const { getTodayEventsReport } = require("../corn/eventCorn");
-const { sendWhatsAppMsg91 } = require('../utils/msg91');
+const { sendWhatsAppMsg91 } = require("../utils/msg91");
 // Removed: const Sentry = require("@sentry/node");
 
 //Download Event Excel
@@ -132,7 +132,10 @@ exports.getAllEvents = async (req, res) => {
         0
       );
       const slotsLeft = event.participantsLimit - totalBookedSlots;
-      const filledPercent = event.participantsLimit > 0 ? totalBookedSlots / event.participantsLimit : 0;
+      const filledPercent =
+        event.participantsLimit > 0
+          ? totalBookedSlots / event.participantsLimit
+          : 0;
       const eventWithSlots = {
         ...event._doc,
         slotsLeft,
@@ -181,9 +184,9 @@ exports.getEventById = async (req, res) => {
     // Find the venue for this event (case-insensitive, trimmed match)
     const Venue = require("../models/Venue");
     const venue = await Venue.findOne({
-      name: { $regex: `^${event.venueName.trim()}$`, $options: 'i' },
-      location: { $regex: `^${event.location.trim()}$`, $options: 'i' },
-      sport: { $regex: `^${event.sportsName.trim()}$`, $options: 'i' },
+      name: { $regex: `^${event.venueName.trim()}$`, $options: "i" },
+      location: { $regex: `^${event.location.trim()}$`, $options: "i" },
+      sport: { $regex: `^${event.sportsName.trim()}$`, $options: "i" },
     });
 
     const successfulParticipants = event.participants.filter(
@@ -756,45 +759,56 @@ exports.handlePayuSuccess = async (req, res) => {
           (acc, curr) => acc + curr.quantity,
           0
         );
-        const occupancy = (totalBookedSlotsUpdated / updatedEvent.participantsLimit) * 100;
+        const occupancy =
+          (totalBookedSlotsUpdated / updatedEvent.participantsLimit) * 100;
         let shouldSave = false;
-        
+
         // 75% notification
-        console.log("outside 75% condition");
         if (occupancy >= 75 && !updatedEvent.notified75) {
           console.log("inside 75% condition");
           try {
-            await sendWhatsAppMsg91(
-              '919408824242',
-              updatedEvent.name, // Name (for {{1}} or {{body_1}})
-              `75% slots booked for event ID: ${updatedEvent._id}`, // Order info (for {{2}} or {{body_2}})
-              true // <--- set to true if your template uses named placeholders (body_1, body_2)
-            );
+            await sendWhatsAppMsg91("919408824242", [
+              updatedEvent.date, // Event Date
+              updatedEvent.slot, // Event Time
+              updatedEvent.venueName, // Venue Name
+              "75%", // Slots filled
+              participant.name, // Customer Name
+              `https://sportomic.com/event/${updatedEvent._id}`, // Event Link
+            ]);
             updatedEvent.notified75 = true;
             shouldSave = true;
           } catch (err) {
-            console.error('Failed to send 75% MSG91 WhatsApp notification:', err.message);
+            console.error(
+              "Failed to send 75% MSG91 WhatsApp notification:",
+              err.message
+            );
           }
         }
-        
+
         // 100% notification
         if (occupancy >= 100 && !updatedEvent.notified100) {
+          console.log("inside 100% condition");
           try {
-            await sendWhatsAppMsg91(
-              '919408824242',
-              updatedEvent.name,
-              `100% slots booked for event ID: ${updatedEvent._id}`,
-              true // <--- same here, toggle true if using named placeholders
-            );
+            await sendWhatsAppMsg91("919408824242", [
+              updatedEvent.date,
+              updatedEvent.slot,
+              updatedEvent.venueName,
+              "100%",
+              participant.name,
+              `https://sportomic.com/event/${updatedEvent._id}`,
+            ]);
             updatedEvent.notified100 = true;
             shouldSave = true;
           } catch (err) {
-            console.error('Failed to send 100% MSG91 WhatsApp notification:', err.message);
+            console.error(
+              "Failed to send 100% MSG91 WhatsApp notification:",
+              err.message
+            );
           }
         }
-        
+
         if (shouldSave) await updatedEvent.save({ session });
-        
+
         // --- End MSG91 WhatsApp Notification Logic ---
       }
 
@@ -901,7 +915,7 @@ exports.uploadEventsFromExcel = async (req, res) => {
     const workbook = XLSX.readFile(filePath);
     const sheetName = workbook.SheetNames[0];
     const data = XLSX.utils.sheet_to_json(workbook.Sheets[sheetName]);
-    
+
     console.log("Raw Excel data:", data);
     console.log("Number of events to process:", data.length);
 
@@ -931,7 +945,7 @@ exports.uploadEventsFromExcel = async (req, res) => {
       ) {
         throw new Error("Each event must have all required fields");
       }
-      
+
       const processedEvent = {
         name: event.name,
         description: event.description,
@@ -946,7 +960,7 @@ exports.uploadEventsFromExcel = async (req, res) => {
         sportsName: event.sportsName,
         participants: [], // Add empty participants array
       };
-      
+
       console.log("Processed event:", processedEvent);
       return processedEvent;
     });
@@ -954,20 +968,20 @@ exports.uploadEventsFromExcel = async (req, res) => {
     console.log("Saving events to database...");
     const savedEvents = await Event.insertMany(events);
     console.log("Successfully saved", savedEvents.length, "events to database");
-    
+
     fs.unlinkSync(filePath);
     console.log("Temporary file deleted");
 
-    res.status(201).json({ 
-      message: "Events Uploaded Successfully", 
+    res.status(201).json({
+      message: "Events Uploaded Successfully",
       count: savedEvents.length,
-      events: savedEvents 
+      events: savedEvents,
     });
   } catch (error) {
     console.error("Error in uploadEventsFromExcel:", error);
-    res.status(500).json({ 
-      message: "Failed to upload events", 
-      error: error.message 
+    res.status(500).json({
+      message: "Failed to upload events",
+      error: error.message,
     });
   }
 };
