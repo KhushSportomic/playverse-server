@@ -6,8 +6,28 @@ const INTEGRATED_NUMBER = '918147845515';
 const TEMPLATE_NAME = 'new_lead_23june';
 const NAMESPACE = '92a9caec_d4c4_42cb_9e01_58b5495e0ac3';
 
-async function sendWhatsAppMsg91(to, body1, body2) {
+async function sendWhatsAppMsg91(to, body1, body2, isNamedPlaceholders = false) {
   try {
+    let components;
+    if (isNamedPlaceholders) {
+      // Named placeholders: components is an object with keys body_1, body_2
+      components = {
+        body_1: { type: "text", value: body1 },
+        body_2: { type: "text", value: body2 }
+      };
+    } else {
+      // Positional placeholders: components is an array with type 'body' and parameters array
+      components = [
+        {
+          type: "body",
+          parameters: [
+            { type: "text", text: body1 },
+            { type: "text", text: body2 }
+          ]
+        }
+      ];
+    }
+
     const payload = {
       integrated_number: INTEGRATED_NUMBER,
       content_type: "template",
@@ -24,22 +44,13 @@ async function sendWhatsAppMsg91(to, body1, body2) {
           to_and_components: [
             {
               to: [to],
-              components: [
-                {
-                  type: "body",
-                  parameters: [
-                    { type: "text", text: body1 },
-                    { type: "text", text: body2 }
-                  ]
-                }
-              ]
+              components: components
             }
           ]
         }
       }
     };
 
-    // 👇 Log payload before sending
     console.log('👉 MSG91 WhatsApp Payload:', JSON.stringify(payload, null, 2));
 
     const response = await axios.post(MSG91_API_URL, JSON.stringify(payload), {
@@ -49,12 +60,10 @@ async function sendWhatsAppMsg91(to, body1, body2) {
       }
     });
 
-    // 👇 Log the API response
     console.log('✅ MSG91 API Response:', response.data);
 
     return response.data;
   } catch (error) {
-    // 👇 Log error properly
     console.error('❌ MSG91 WhatsApp Error:', error.response?.data || error.message);
     throw error;
   }

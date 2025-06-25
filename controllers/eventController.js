@@ -758,6 +758,7 @@ exports.handlePayuSuccess = async (req, res) => {
         );
         const occupancy = (totalBookedSlotsUpdated / updatedEvent.participantsLimit) * 100;
         let shouldSave = false;
+        
         // 75% notification
         console.log("outside 75% condition");
         if (occupancy >= 75 && !updatedEvent.notified75) {
@@ -765,8 +766,9 @@ exports.handlePayuSuccess = async (req, res) => {
           try {
             await sendWhatsAppMsg91(
               '919408824242',
-              updatedEvent.name, // Name (for {{1}})
-              `75% slots booked for event ID: ${updatedEvent._id}` // Order number/info (for {{2}})
+              updatedEvent.name, // Name (for {{1}} or {{body_1}})
+              `75% slots booked for event ID: ${updatedEvent._id}`, // Order info (for {{2}} or {{body_2}})
+              false // <--- set to true if your template uses named placeholders (body_1, body_2)
             );
             updatedEvent.notified75 = true;
             shouldSave = true;
@@ -774,13 +776,15 @@ exports.handlePayuSuccess = async (req, res) => {
             console.error('Failed to send 75% MSG91 WhatsApp notification:', err.message);
           }
         }
+        
         // 100% notification
         if (occupancy >= 100 && !updatedEvent.notified100) {
           try {
             await sendWhatsAppMsg91(
               '919408824242',
-              updatedEvent.name, // Name (for {{1}})
-              `100% slots booked for event ID: ${updatedEvent._id}` // Order number/info (for {{2}})
+              updatedEvent.name,
+              `100% slots booked for event ID: ${updatedEvent._id}`,
+              false // <--- same here, toggle true if using named placeholders
             );
             updatedEvent.notified100 = true;
             shouldSave = true;
@@ -788,7 +792,9 @@ exports.handlePayuSuccess = async (req, res) => {
             console.error('Failed to send 100% MSG91 WhatsApp notification:', err.message);
           }
         }
+        
         if (shouldSave) await updatedEvent.save({ session });
+        
         // --- End MSG91 WhatsApp Notification Logic ---
       }
 
