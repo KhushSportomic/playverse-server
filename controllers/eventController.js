@@ -767,14 +767,14 @@ exports.handlePayuSuccess = async (req, res) => {
         if (occupancy >= 75 && !updatedEvent.notified75) {
           console.log("inside 75% condition");
           try {
-            await sendWhatsAppMsg91("919408824242", [
-              updatedEvent.date, // Event Date
-              updatedEvent.slot, // Event Time
-              updatedEvent.venueName, // Venue Name
-              "75%", // Slots filled
-              participant.name, // Customer Name
-              `https://sportomic.com/event/${updatedEvent._id}`, // Event Link
-            ]);
+            await sendWhatsAppMsg91(
+              "919408824242",
+              // body_1
+              `Event Date: ${updatedEvent.date}\nEvent Time: ${updatedEvent.slot}\nVenue Name: ${updatedEvent.venueName}`,
+              // body_2
+              `Slots filled: 75%\nCustomer Name: ${participant.name}\nEvent Link: https://https://playverse-client-nine.vercel.app//event/${updatedEvent._id}`
+            );
+            
             updatedEvent.notified75 = true;
             shouldSave = true;
           } catch (err) {
@@ -784,19 +784,19 @@ exports.handlePayuSuccess = async (req, res) => {
             );
           }
         }
+        
 
         // 100% notification
         if (occupancy >= 100 && !updatedEvent.notified100) {
           console.log("inside 100% condition");
           try {
-            await sendWhatsAppMsg91("919408824242", [
-              updatedEvent.date,
-              updatedEvent.slot,
-              updatedEvent.venueName,
-              "100%",
-              participant.name,
-              `https://sportomic.com/event/${updatedEvent._id}`,
-            ]);
+            await sendWhatsAppMsg91(
+              "919408824242",
+              // body_1
+              `Event Date: ${updatedEvent.date}\nEvent Time: ${updatedEvent.slot}\nVenue Name: ${updatedEvent.venueName}`,
+              // body_2
+              `Slots filled: 100%\nCustomer Name: ${participant.name}\nEvent Link: https://https://playverse-client-nine.vercel.app//event/${updatedEvent._id}`
+            );
             updatedEvent.notified100 = true;
             shouldSave = true;
           } catch (err) {
