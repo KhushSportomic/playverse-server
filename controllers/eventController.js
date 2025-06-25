@@ -769,12 +769,12 @@ exports.handlePayuSuccess = async (req, res) => {
           try {
             await sendWhatsAppMsg91(
               '919408824242',
-              updatedEvent.date,
-              updatedEvent.slot,
-              updatedEvent.venueName,
-              '75%', // or '100%'
-              participant.name,
-              `https://playverse-client-nine.vercel.app/event/${updatedEvent._id}`
+              updatedEvent.date || "",
+              updatedEvent.slot || "",
+              updatedEvent.venueName || "",
+              '75%',
+              participant.name || "",
+              `https://playverse-client-nine.vercel.app/event/${updatedEvent._id || ""}`
             );
             
             
@@ -797,12 +797,12 @@ exports.handlePayuSuccess = async (req, res) => {
           try {
             await sendWhatsAppMsg91(
               '919408824242',
-              updatedEvent.date,
-              updatedEvent.slot,
-              updatedEvent.venueName,
-              '100%', // or '100%'
-              participant.name,
-              `https://playverse-client-nine.vercel.app/event/${updatedEvent._id}`
+              updatedEvent.date || "",
+              updatedEvent.slot || "",
+              updatedEvent.venueName || "",
+              '100%',
+              participant.name || "",
+              `https://playverse-client-nine.vercel.app/event/${updatedEvent._id || ""}`
             );
             
             
