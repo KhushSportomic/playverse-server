@@ -769,11 +769,12 @@ exports.handlePayuSuccess = async (req, res) => {
           try {
             await sendWhatsAppMsg91(
               "919408824242",
-              // body_1
-              `Event Date: ${updatedEvent.date}\nEvent Time: ${updatedEvent.slot}\nVenue Name: ${updatedEvent.venueName}`,
-              // body_2
-              `Slots filled: 75%\nCustomer Name: ${participant.name}\nEvent Link: https://https://playverse-client-nine.vercel.app//event/${updatedEvent._id}`
+              // body_1 without newlines
+              `Event Date: ${updatedEvent.date} | Event Time: ${updatedEvent.slot} | Venue Name: ${updatedEvent.venueName}`,
+              // body_2 without newlines
+              `Slots filled: 75% | Customer Name: ${participant.name} | Event Link: https://playverse-client-nine.vercel.app/event/${updatedEvent._id}`
             );
+            
             
             updatedEvent.notified75 = true;
             shouldSave = true;
@@ -792,11 +793,12 @@ exports.handlePayuSuccess = async (req, res) => {
           try {
             await sendWhatsAppMsg91(
               "919408824242",
-              // body_1
-              `Event Date: ${updatedEvent.date}\nEvent Time: ${updatedEvent.slot}\nVenue Name: ${updatedEvent.venueName}`,
-              // body_2
-              `Slots filled: 100%\nCustomer Name: ${participant.name}\nEvent Link: https://https://playverse-client-nine.vercel.app//event/${updatedEvent._id}`
+              // body_1 without newlines
+              `Event Date: ${updatedEvent.date} | Event Time: ${updatedEvent.slot} | Venue Name: ${updatedEvent.venueName}`,
+              // body_2 without newlines
+              `Slots filled: 100% | Customer Name: ${participant.name} | Event Link: https://playverse-client-nine.vercel.app/event/${updatedEvent._id}`
             );
+            
             updatedEvent.notified100 = true;
             shouldSave = true;
           } catch (err) {
