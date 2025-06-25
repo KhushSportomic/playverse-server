@@ -54,6 +54,6 @@ router.get("/today/by-venue", getTodaysEventsByVenue);
 //event daily report
 router.get("/today/report", getEventReports);
 
-router.get("/:venueName/:location/:date/:slotTime", getEventByVenueLocationDateSlot);
+// router.get("/:venueName/:location/:date/:slotTime", getEventByVenueLocationDateSlot);
 
 module.exports = router;

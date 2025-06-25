@@ -1187,35 +1187,35 @@ function formatDate(date) {
 }
 
 // Get Event By Venue Name, Location, Date, and Slot Time (SEO-friendly URL)
-exports.getEventByVenueLocationDateSlot = async (req, res) => {
-  try {
-    const { venueName, location, date, slotTime } = req.params;
-
-    // Convert slug back to a case-insensitive regex for searching
-    const venueNameRegex = new RegExp(`^${venueName.replace(/-/g, " ")}$`, "i");
-    const locationRegex = new RegExp(`^${location.replace(/-/g, " ")}$`, "i");
-
-    // Revert the slot slug to its original format
-    const originalSlotTime = slotTime
-      .replace(/-/g, " ")
-      .replace(/_/g, " - ")
-      .replace(/\./g, ":");
-
-    // Find the event using these fields
-    const event = await Event.findOne({
-      venueName: { $regex: venueNameRegex },
-      location: { $regex: locationRegex },
-      date: new Date(date), // Ensure date is in correct format
-      slot: originalSlotTime,
-    });
-
-    if (!event) {
-      return res.status(404).json({ error: "Event not found" });
-    }
-
-    res.json(event);
-  } catch (error) {
-    console.error("Error in getEventByVenueLocationDateSlot:", error);
-    res.status(500).json({ error: "Failed to fetch event" });
-  }
-};
+// exports.getEventByVenueLocationDateSlot = async (req, res) => {
+//   try {
+//     const { venueName, location, date, slotTime } = req.params;
+//
+//     // Convert slug back to a case-insensitive regex for searching
+//     const venueNameRegex = new RegExp(`^${venueName.replace(/-/g, " ")}$`, "i");
+//     const locationRegex = new RegExp(`^${location.replace(/-/g, " ")}$`, "i");
+//
+//     // Revert the slot slug to its original format
+//     const originalSlotTime = slotTime
+//       .replace(/-/g, " ")
+//       .replace(/_/g, " - ")
+//       .replace(/\./g, ":");
+//
+//     // Find the event using these fields
+//     const event = await Event.findOne({
+//       venueName: { $regex: venueNameRegex },
+//       location: { $regex: locationRegex },
+//       date: new Date(date), // Ensure date is in correct format
+//       slot: originalSlotTime,
+//     });
+//
+//     if (!event) {
+//       return res.status(404).json({ error: "Event not found" });
+//     }
+//
+//     res.json(event);
+//   } catch (error) {
+//     console.error("Error in getEventByVenueLocationDateSlot:", error);
+//     res.status(500).json({ error: "Failed to fetch event" });
+//   }
+// };
