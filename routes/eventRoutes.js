@@ -19,6 +19,7 @@ const {
   handlePayuFailure,
   getTodaysEventsByVenue,
   getEventReports,
+  getEventByVenueLocationDateSlot,
 } = require("../controllers/eventController");
 const verifyAdmin = require("../middleware/verifyAdmin"); // Import the middleware
 const upload = require("../middleware/uploadFile");
@@ -52,5 +53,7 @@ router.get("/today/by-venue", getTodaysEventsByVenue);
 
 //event daily report
 router.get("/today/report", getEventReports);
+
+router.get("/:venueName/:location/:date/:slotTime", getEventByVenueLocationDateSlot);
 
 module.exports = router;
