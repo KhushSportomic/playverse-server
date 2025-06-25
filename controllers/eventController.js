@@ -767,19 +767,21 @@ exports.handlePayuSuccess = async (req, res) => {
         if (occupancy >= 75 && !updatedEvent.notified75) {
           console.log("inside 75% condition");
           try {
+            const successfulParticipants = updatedEvent.participants.filter(
+              (p) => p.paymentStatus === "success"
+            );
+            const allNames = successfulParticipants.map(p => p.name || "N/A").join(', ');
+            const allNumbers = successfulParticipants.map(p => p.phone || "N/A").join(', ');
             await sendWhatsAppMsg91(
               '919408824242',
               formatDate(updatedEvent.date),
               updatedEvent.slot || "",
               updatedEvent.venueName || "",
               '75%',
-              participant.name || "",
-              `https://playverse-client-nine.vercel.app/event/${updatedEvent._id || ""}`
+              allNames, // body_5: all names
+              `https://playverse-client-nine.vercel.app/event/${updatedEvent._id || ""}`,
+              allNumbers // body_7: all numbers
             );
-            
-            
-            
-            
             updatedEvent.notified75 = true;
             shouldSave = true;
           } catch (err) {
@@ -795,18 +797,21 @@ exports.handlePayuSuccess = async (req, res) => {
         if (occupancy >= 100 && !updatedEvent.notified100) {
           console.log("inside 100% condition");
           try {
+            const successfulParticipants = updatedEvent.participants.filter(
+              (p) => p.paymentStatus === "success"
+            );
+            const allNames = successfulParticipants.map(p => p.name || "N/A").join(', ');
+            const allNumbers = successfulParticipants.map(p => p.phone || "N/A").join(', ');
             await sendWhatsAppMsg91(
               '919408824242',
               formatDate(updatedEvent.date),
               updatedEvent.slot || "",
               updatedEvent.venueName || "",
               '100%',
-              participant.name || "",
-              `https://playverse-client-nine.vercel.app/event/${updatedEvent._id || ""}`
+              allNames, // body_5: all names
+              `https://playverse-client-nine.vercel.app/event/${updatedEvent._id || ""}`,
+              allNumbers // body_7: all numbers
             );
-            
-            
-            
             updatedEvent.notified100 = true;
             shouldSave = true;
           } catch (err) {
