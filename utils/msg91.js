@@ -19,19 +19,14 @@ const NAMESPACE = '92a9caec_d4c4_42cb_9e01_58b5495e0ac3';
  */
 async function sendWhatsAppMsg91(to, body1, body2, body3, body4, body5, body6) {
   try {
-    const components = [
-      {
-        type: "body",
-        parameters: [
-          { type: "text", text: body1 },
-          { type: "text", text: body2 },
-          { type: "text", text: body3 },
-          { type: "text", text: body4 },
-          { type: "text", text: body5 },
-          { type: "text", text: body6 },
-        ]
-      }
-    ];
+    const components = {
+      body_1: { type: "text", value: body1 },
+      body_2: { type: "text", value: body2 },
+      body_3: { type: "text", value: body3 },
+      body_4: { type: "text", value: body4 },
+      body_5: { type: "text", value: body5 },
+      body_6: { type: "text", value: body6 }
+    };
 
     const payload = {
       integrated_number: INTEGRATED_NUMBER,
