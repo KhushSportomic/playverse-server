@@ -58,7 +58,7 @@ async function sendWhatsAppMsg91(to, body1, body2, body3, body4, body5, body6) {
 
     console.log('👉 MSG91 WhatsApp Payload:', JSON.stringify(payload, null, 2));
 
-    const response = await axios.post(MSG91_API_URL, payload, {
+    const response = await axios.post(MSG91_API_URL, JSON.stringify(payload), {
       headers: {
         'Content-Type': 'application/json',
         'authkey': MSG91_AUTH_KEY
