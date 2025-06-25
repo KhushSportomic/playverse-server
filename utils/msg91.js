@@ -7,13 +7,23 @@ const INTEGRATED_NUMBER = '918147845515';
 const TEMPLATE_NAME = 'new_lead_23june';
 const NAMESPACE = '92a9caec_d4c4_42cb_9e01_58b5495e0ac3';
 
+/**
+ * Send WhatsApp template message with 6 positional placeholders
+ * @param {string} to - recipient phone number with country code
+ * @param {Array<string>} paramsArray - array of exactly 6 strings for placeholders {{1}} to {{6}}
+ */
+async function sendWhatsAppMsg91(to, paramsArray) {
+  if (!Array.isArray(paramsArray) || paramsArray.length !== 6) {
+    throw new Error('paramsArray must be an array of exactly 6 strings.');
+  }
 
-async function sendWhatsAppMsg91(to, body1, body2) {
   try {
-    const components = {
-      body_1: { type: "text", value: body1 },
-      body_2: { type: "text", value: body2 }
-    };
+    const components = [
+      {
+        type: "body",
+        parameters: paramsArray.map(text => ({ type: "text", text }))
+      }
+    ];
 
     const payload = {
       integrated_number: INTEGRATED_NUMBER,

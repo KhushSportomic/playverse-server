@@ -767,13 +767,15 @@ exports.handlePayuSuccess = async (req, res) => {
         if (occupancy >= 75 && !updatedEvent.notified75) {
           console.log("inside 75% condition");
           try {
-            await sendWhatsAppMsg91(
-              "919408824242",
-              // body_1 without newlines
-              `Event Date: ${updatedEvent.date} | Event Time: ${updatedEvent.slot} | Venue Name: ${updatedEvent.venueName}`,
-              // body_2 without newlines
-              `Slots filled: 75% | Customer Name: ${participant.name} | Event Link: https://playverse-client-nine.vercel.app/event/${updatedEvent._id}`
-            );
+            await sendWhatsAppMsg91('919408824242', [
+              updatedEvent.date,
+              updatedEvent.slot,
+              updatedEvent.venueName,
+              '75%',                // or '100%'
+              participant.name,
+              `https://playverse-client-nine.vercel.app/event/${updatedEvent._id}`
+            ]);
+            
             
             
             updatedEvent.notified75 = true;
@@ -791,13 +793,15 @@ exports.handlePayuSuccess = async (req, res) => {
         if (occupancy >= 100 && !updatedEvent.notified100) {
           console.log("inside 100% condition");
           try {
-            await sendWhatsAppMsg91(
-              "919408824242",
-              // body_1 without newlines
-              `Event Date: ${updatedEvent.date} | Event Time: ${updatedEvent.slot} | Venue Name: ${updatedEvent.venueName}`,
-              // body_2 without newlines
-              `Slots filled: 100% | Customer Name: ${participant.name} | Event Link: https://playverse-client-nine.vercel.app/event/${updatedEvent._id}`
-            );
+            await sendWhatsAppMsg91('919408824242', [
+              updatedEvent.date,
+              updatedEvent.slot,
+              updatedEvent.venueName,
+              '100%',                // or '100%'
+              participant.name,
+              `https://playverse-client-nine.vercel.app/event/${updatedEvent._id}`
+            ]);
+            
             
             updatedEvent.notified100 = true;
             shouldSave = true;
