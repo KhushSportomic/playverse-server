@@ -769,7 +769,7 @@ exports.handlePayuSuccess = async (req, res) => {
           try {
             await sendWhatsAppMsg91(
               '919408824242',
-              updatedEvent.date || "",
+              formatDate(updatedEvent.date),
               updatedEvent.slot || "",
               updatedEvent.venueName || "",
               '75%',
@@ -797,7 +797,7 @@ exports.handlePayuSuccess = async (req, res) => {
           try {
             await sendWhatsAppMsg91(
               '919408824242',
-              updatedEvent.date || "",
+              formatDate(updatedEvent.date),
               updatedEvent.slot || "",
               updatedEvent.venueName || "",
               '100%',
@@ -1171,3 +1171,12 @@ exports.sendCancellation = async (req, res) => {
     res.status(500).json({ error: "Failed to send cancellation messages" });
   }
 };
+
+// Helper function to format date as DD-MM-YYYY
+function formatDate(date) {
+  const d = new Date(date);
+  const day = String(d.getDate()).padStart(2, '0');
+  const month = String(d.getMonth() + 1).padStart(2, '0');
+  const year = d.getFullYear();
+  return `${day}-${month}-${year}`;
+}
