@@ -767,14 +767,16 @@ exports.handlePayuSuccess = async (req, res) => {
         if (occupancy >= 75 && !updatedEvent.notified75) {
           console.log("inside 75% condition");
           try {
-            await sendWhatsAppMsg91('919408824242', [
+            await sendWhatsAppMsg91(
+              '919408824242',
               updatedEvent.date,
               updatedEvent.slot,
               updatedEvent.venueName,
-              '75%',                // or '100%'
+              '75%', // or '100%'
               participant.name,
               `https://playverse-client-nine.vercel.app/event/${updatedEvent._id}`
-            ]);
+            );
+            
             
             
             
@@ -793,14 +795,16 @@ exports.handlePayuSuccess = async (req, res) => {
         if (occupancy >= 100 && !updatedEvent.notified100) {
           console.log("inside 100% condition");
           try {
-            await sendWhatsAppMsg91('919408824242', [
+            await sendWhatsAppMsg91(
+              '919408824242',
               updatedEvent.date,
               updatedEvent.slot,
               updatedEvent.venueName,
-              '100%',                // or '100%'
+              '100%', // or '100%'
               participant.name,
               `https://playverse-client-nine.vercel.app/event/${updatedEvent._id}`
-            ]);
+            );
+            
             
             
             updatedEvent.notified100 = true;

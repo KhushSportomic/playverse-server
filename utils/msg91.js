@@ -8,20 +8,28 @@ const TEMPLATE_NAME = 'new_lead_23june';
 const NAMESPACE = '92a9caec_d4c4_42cb_9e01_58b5495e0ac3';
 
 /**
- * Send WhatsApp template message with 6 positional placeholders
+ * Send WhatsApp template message with 6 placeholders as separate params
  * @param {string} to - recipient phone number with country code
- * @param {Array<string>} paramsArray - array of exactly 6 strings for placeholders {{1}} to {{6}}
+ * @param {string} body1 - placeholder 1
+ * @param {string} body2 - placeholder 2
+ * @param {string} body3 - placeholder 3
+ * @param {string} body4 - placeholder 4
+ * @param {string} body5 - placeholder 5
+ * @param {string} body6 - placeholder 6
  */
-async function sendWhatsAppMsg91(to, paramsArray) {
-  if (!Array.isArray(paramsArray) || paramsArray.length !== 6) {
-    throw new Error('paramsArray must be an array of exactly 6 strings.');
-  }
-
+async function sendWhatsAppMsg91(to, body1, body2, body3, body4, body5, body6) {
   try {
     const components = [
       {
         type: "body",
-        parameters: paramsArray.map(text => ({ type: "text", text }))
+        parameters: [
+          { type: "text", text: body1 },
+          { type: "text", text: body2 },
+          { type: "text", text: body3 },
+          { type: "text", text: body4 },
+          { type: "text", text: body5 },
+          { type: "text", text: body6 },
+        ]
       }
     ];
 
@@ -50,7 +58,7 @@ async function sendWhatsAppMsg91(to, paramsArray) {
 
     console.log('👉 MSG91 WhatsApp Payload:', JSON.stringify(payload, null, 2));
 
-    const response = await axios.post(MSG91_API_URL, JSON.stringify(payload), {
+    const response = await axios.post(MSG91_API_URL, payload, {
       headers: {
         'Content-Type': 'application/json',
         'authkey': MSG91_AUTH_KEY
