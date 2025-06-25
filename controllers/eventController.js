@@ -768,7 +768,7 @@ exports.handlePayuSuccess = async (req, res) => {
               '919408824242',
               updatedEvent.name, // Name (for {{1}} or {{body_1}})
               `75% slots booked for event ID: ${updatedEvent._id}`, // Order info (for {{2}} or {{body_2}})
-              false // <--- set to true if your template uses named placeholders (body_1, body_2)
+              true // <--- set to true if your template uses named placeholders (body_1, body_2)
             );
             updatedEvent.notified75 = true;
             shouldSave = true;
@@ -784,7 +784,7 @@ exports.handlePayuSuccess = async (req, res) => {
               '919408824242',
               updatedEvent.name,
               `100% slots booked for event ID: ${updatedEvent._id}`,
-              false // <--- same here, toggle true if using named placeholders
+              true // <--- same here, toggle true if using named placeholders
             );
             updatedEvent.notified100 = true;
             shouldSave = true;
