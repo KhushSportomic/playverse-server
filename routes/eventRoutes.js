@@ -54,6 +54,7 @@ router.get("/today/by-venue", getTodaysEventsByVenue);
 //event daily report
 router.get("/today/report", getEventReports);
 
-// router.get("/:venueName/:location/:date/:slotTime", getEventByVenueLocationDateSlot);
+// SEO-friendly event route (must be above "/:id" to avoid conflicts)
+router.get("/:venueName/:location/:date/:slotTime", getEventByVenueLocationDateSlot);
 
 module.exports = router;
