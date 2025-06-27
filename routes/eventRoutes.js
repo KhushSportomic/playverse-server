@@ -31,6 +31,10 @@ router.put("/:id", editEvent);
 router.delete("/:id", deleteEvent);
 
 router.get("/", getAllEvents);
+
+// SEO-friendly event route (must be above "/:id" to avoid conflicts)
+router.get("/:venueName/:location/:date/:slotTime", getEventByVenueLocationDateSlot);
+
 router.get("/:id", getEventById);
 router.get("/:id/successful-payments", getSuccessfulPayments);
 
@@ -53,8 +57,5 @@ router.get("/today/by-venue", getTodaysEventsByVenue);
 
 //event daily report
 router.get("/today/report", getEventReports);
-
-// SEO-friendly event route (must be above "/:id" to avoid conflicts)
-router.get("/:venueName/:location/:date/:slotTime", getEventByVenueLocationDateSlot);
 
 module.exports = router;
