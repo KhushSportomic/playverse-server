@@ -35,6 +35,7 @@ exports.downloadEventExcel = async (req, res) => {
       "Date",
       "Time",
       "Event Price",
+      "Actual Price",
       "Payment Id",
       "Order Id",
       "Participant Name",
@@ -56,6 +57,7 @@ exports.downloadEventExcel = async (req, res) => {
             event.date,
             event.slot,
             event.price,
+            event.actualPrice,
             participant.paymentId,
             participant.orderId,
             participant.name,
@@ -262,6 +264,7 @@ exports.createEvent = async (req, res) => {
     slot,
     participantsLimit,
     price,
+    actualPrice,
     venueName,
     venueImage,
     location,
@@ -275,6 +278,7 @@ exports.createEvent = async (req, res) => {
     !slot ||
     !participantsLimit ||
     !price ||
+    !actualPrice ||
     !venueName ||
     !location ||
     !sportsName
@@ -290,6 +294,7 @@ exports.createEvent = async (req, res) => {
       slot,
       participantsLimit,
       price,
+      actualPrice,
       venueName,
       venueImage,
       location,
@@ -770,16 +775,22 @@ exports.handlePayuSuccess = async (req, res) => {
             const successfulParticipants = updatedEvent.participants.filter(
               (p) => p.paymentStatus === "success"
             );
-            const allNames = successfulParticipants.map(p => p.name || "N/A").join(', ');
-            const allNumbers = successfulParticipants.map(p => p.phone || "N/A").join(', ');
+            const allNames = successfulParticipants
+              .map((p) => p.name || "N/A")
+              .join(", ");
+            const allNumbers = successfulParticipants
+              .map((p) => p.phone || "N/A")
+              .join(", ");
             await sendWhatsAppMsg91(
-              '919408824242',
+              "919408824242",
               formatDate(updatedEvent.date),
               updatedEvent.slot || "",
               updatedEvent.venueName || "",
-              '75%',
+              "75%",
               allNames, // body_5: all names
-              `https://playverse-client-nine.vercel.app/event/${updatedEvent._id || ""}`,
+              `https://playverse-client-nine.vercel.app/event/${
+                updatedEvent._id || ""
+              }`,
               allNumbers // body_7: all numbers
             );
             updatedEvent.notified75 = true;
@@ -791,7 +802,6 @@ exports.handlePayuSuccess = async (req, res) => {
             );
           }
         }
-        
 
         // 100% notification
         if (occupancy >= 100 && !updatedEvent.notified100) {
@@ -800,16 +810,22 @@ exports.handlePayuSuccess = async (req, res) => {
             const successfulParticipants = updatedEvent.participants.filter(
               (p) => p.paymentStatus === "success"
             );
-            const allNames = successfulParticipants.map(p => p.name || "N/A").join(', ');
-            const allNumbers = successfulParticipants.map(p => p.phone || "N/A").join(', ');
+            const allNames = successfulParticipants
+              .map((p) => p.name || "N/A")
+              .join(", ");
+            const allNumbers = successfulParticipants
+              .map((p) => p.phone || "N/A")
+              .join(", ");
             await sendWhatsAppMsg91(
-              '919408824242',
+              "919408824242",
               formatDate(updatedEvent.date),
               updatedEvent.slot || "",
               updatedEvent.venueName || "",
-              '100%',
+              "100%",
               allNames, // body_5: all names
-              `https://playverse-client-nine.vercel.app/event/${updatedEvent._id || ""}`,
+              `https://playverse-client-nine.vercel.app/event/${
+                updatedEvent._id || ""
+              }`,
               allNumbers // body_7: all numbers
             );
             updatedEvent.notified100 = true;
@@ -1180,8 +1196,8 @@ exports.sendCancellation = async (req, res) => {
 // Helper function to format date as DD-MM-YYYY
 function formatDate(date) {
   const d = new Date(date);
-  const day = String(d.getDate()).padStart(2, '0');
-  const month = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, "0");
+  const month = String(d.getMonth() + 1).padStart(2, "0");
   const year = d.getFullYear();
   return `${day}-${month}-${year}`;
 }

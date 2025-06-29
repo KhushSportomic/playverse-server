@@ -57,6 +57,11 @@ const eventSchema = new mongoose.Schema({
     required: true,
     min: 0,
   },
+  actualPrice: {
+    type: Number,
+    required: false,
+    min: 0,
+  },
   sportsName: {
     type: String,
     required: true,
