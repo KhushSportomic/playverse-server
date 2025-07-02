@@ -1334,7 +1334,6 @@ exports.getEventsWithPayments = async (req, res) => {
 // };
 
 
-const crypto = require("crypto");
 const qs = require("qs");
 const { v4: uuidv4 } = require("uuid"); // npm install uuid
 
