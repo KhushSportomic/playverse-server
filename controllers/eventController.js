@@ -1260,75 +1260,126 @@ exports.getEventsWithPayments = async (req, res) => {
 };
 
 // Refund Payment via PayU
+// exports.refundPayment = async (req, res) => {
+//   console.log("refundPayment called");
+//   try {
+//     const { id, participantId } = req.params;
+//     const event = await Event.findById(id);
+//     if (!event) return res.status(404).json({ error: "Event not found" });
+
+//     const participant = event.participants.find((p) => p.id === participantId);
+//     if (!participant)
+//       return res.status(404).json({ error: "Participant not found" });
+//     if (!participant.paymentId)
+//       return res
+//         .status(400)
+//         .json({ error: "No paymentId for this participant" });
+
+//     const key = process.env.PAYU_MERCHANT_KEY;
+//     const salt = process.env.PAYU_MERCHANT_SALT;
+//     const mihpayid = participant.paymentId;
+//     const amount = participant.amount;
+//     const command = "cancel_refund_transaction";
+//     const var1 = mihpayid;
+//     const var2 = "2.00";
+//     const hashString = `${key}|${command}|${var1}|${salt}`;
+//     const hash = require("crypto")
+//       .createHash("sha512")
+//       .update(hashString)
+//       .digest("hex");
+//     console.log(" value of hash", hash);
+//     console.log("Hash string:", JSON.stringify(hashString));
+//     console.log("value of salt", salt);
+
+//     // const params = new URLSearhParams();
+//     // params.append("key", key);
+//     // params.append("command", command);
+//     // params.append("var1", var1);
+//     // params.append("var2", var2);
+//     // params.append("hash", hash);
+
+//     const params = require("qs").stringify({
+//       key,
+//       command,
+//       var1,
+//       var2,
+//       hash,
+//     });
+//     console.log(" value of params", params);
+
+//     const payuUrl = "https://info.payu.in/merchant/postservice.php?form=2";
+//     const axios = require("axios");
+//     console.log("payload before making request", params.toString());
+
+//     const payuRes = await axios.post(payuUrl, params.toString(), {
+//       headers: {
+//         "Content-Type": "application/x-www-form-urlencoded",
+//         "Accept": "application/json",
+//       },
+//     });
+
+//     console.log("PayU refund response:", payuRes.data);
+
+//     res.status(200).json({ refundResult: payuRes.data });
+//   } catch (error) {
+//     console.error(
+//       "Error in refundPayment:",
+//       error?.response?.data || error.message
+//     );
+//     res.status(500).json({
+//       error: "Refund failed",
+//       details: error?.response?.data || error.message,
+//     });
+//   }
+// };
+
+
+const crypto = require("crypto");
+const qs = require("qs");
+const { v4: uuidv4 } = require("uuid"); // npm install uuid
+
 exports.refundPayment = async (req, res) => {
-  console.log("refundPayment called");
   try {
     const { id, participantId } = req.params;
     const event = await Event.findById(id);
     if (!event) return res.status(404).json({ error: "Event not found" });
 
     const participant = event.participants.find((p) => p.id === participantId);
-    if (!participant)
-      return res.status(404).json({ error: "Participant not found" });
-    if (!participant.paymentId)
-      return res
-        .status(400)
-        .json({ error: "No paymentId for this participant" });
+    if (!participant) return res.status(404).json({ error: "Participant not found" });
+    if (!participant.paymentId) return res.status(400).json({ error: "No paymentId" });
 
     const key = process.env.PAYU_MERCHANT_KEY;
     const salt = process.env.PAYU_MERCHANT_SALT;
-    const mihpayid = participant.paymentId;
-    const amount = participant.amount;
     const command = "cancel_refund_transaction";
-    const var1 = mihpayid;
-    const var2 = "2.00";
+    const var1 = participant.paymentId; // mihpayid
+    const var2 = uuidv4().replace(/-/g, "").slice(0, 23); // unique token max 23 chars
+    const var3 = parseFloat(participant.amount).toFixed(2); // refund amount
+
     const hashString = `${key}|${command}|${var1}|${salt}`;
-    const hash = require("crypto")
-      .createHash("sha512")
-      .update(hashString)
-      .digest("hex");
-    console.log(" value of hash", hash);
-    console.log("Hash string:", JSON.stringify(hashString));
-    console.log("value of salt", salt);
+    const hash = crypto.createHash("sha512").update(hashString).digest("hex");
 
-    // const params = new URLSearhParams();
-    // params.append("key", key);
-    // params.append("command", command);
-    // params.append("var1", var1);
-    // params.append("var2", var2);
-    // params.append("hash", hash);
-
-    const params = require("qs").stringify({
+    const params = qs.stringify({
       key,
       command,
       var1,
       var2,
+      var3,
       hash,
     });
-    console.log(" value of params", params);
 
-    const payuUrl = "https://info.payu.in/merchant/postservice.php?form=2";
+    const payuUrl = "https://test.payu.in/merchant/postservice.php?form=2";
     const axios = require("axios");
-    console.log("payload before making request", params.toString());
 
-    const payuRes = await axios.post(payuUrl, params.toString(), {
+    const payuRes = await axios.post(payuUrl, params, {
       headers: {
         "Content-Type": "application/x-www-form-urlencoded",
-        "Accept": "application/json",
+        Accept: "application/json",
       },
     });
 
-    console.log("PayU refund response:", payuRes.data);
-
     res.status(200).json({ refundResult: payuRes.data });
   } catch (error) {
-    console.error(
-      "Error in refundPayment:",
-      error?.response?.data || error.message
-    );
-    res.status(500).json({
-      error: "Refund failed",
-      details: error?.response?.data || error.message,
-    });
+    console.error("Refund error:", error?.response?.data || error.message);
+    res.status(500).json({ error: "Refund failed", details: error?.response?.data || error.message });
   }
 };
